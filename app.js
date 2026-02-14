@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const Listing = require("./models/listing");
 const path = require("path");
 const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
+
 
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
@@ -15,6 +17,8 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+app.engine("ejs", ejsMate);
+app.use(express.static(path.join(__dirname, "public")));
 
 main().then(() => {
     console.log("Connected to MongoDB");
@@ -43,16 +47,32 @@ app.post("/listings", async (req, res) => {
 
 //Show Route (MUST come after /listings/new)
 app.get("/listings/:id", async (req, res) => {
-  let { id } = req.params;
-  const listing = await Listing.findById(id);
-  res.render("listings/show.ejs", { listing });
+  try {
+    let { id } = req.params;
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      return res.status(404).send("Listing not found");
+    }
+    res.render("listings/show.ejs", { listing });
+  } catch (err) {
+    console.error(err);
+    res.status(400).send("Invalid listing ID");
+  }
 });
 
 //Edit Route
 app.get("/listings/:id/edit", async (req, res) => {
-  let { id } = req.params;
-  const listing = await Listing.findById(id);
-  res.render("listings/edit.ejs", { listing });
+  try {
+    let { id } = req.params;
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      return res.status(404).send("Listing not found");
+    }
+    res.render("listings/edit.ejs", { listing });
+  } catch (err) {
+    console.error(err);
+    res.status(400).send("Invalid listing ID");
+  }
 });
 
 //Update Route
