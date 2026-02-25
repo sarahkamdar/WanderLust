@@ -51,7 +51,7 @@
           <p class="card-text"><%= review.comment %></p>
           <p class="card-text">Rating: <%= review.rating %> stars</p>
           <!-- <p class="card-text"><small class="text-muted">Posted on <%= review.createdAt.toLocaleDateString() %></small></p>  -->
-            <form class="mb-3" method="POST" action="/listings/<%=listing._id%>/reviews/<%=review._id%>"?_method=DELETE>
+            <form class="mb-3" method="POST" action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE">
           <button class="btn btn-sm btn-dark">Delete</button>
         </form>
         </div>
