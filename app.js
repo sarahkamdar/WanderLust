@@ -7,9 +7,13 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpresError.js");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const localStrategy = require("passport-local");
+const User = require("./models/user.js");
 
-const listingRoutes = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
+const listingRouter = require("./routes/listing.js");
+const reviewRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
@@ -37,6 +41,12 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
@@ -45,6 +55,12 @@ app.use((req, res, next) => {
     next();
 });
 
+// app.get("/demoUser", async (req, res) => {
+//     const fakeuser = new User({ email: "student@mail.com", username: "student" });
+//     const newUser = await User.register(fakeuser, "helloworld");
+//     res.send(newUser);
+// });
+
 main().then(() => {
     console.log("Connected to MongoDB");
 }).catch((err) => {
@@ -52,8 +68,9 @@ main().then(() => {
 });
 
 
-app.use("/listings", listingRoutes);
-app.use("/listings/:id/reviews", reviews);
+app.use("/listings", listingRouter);
+app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", userRouter);
 
 app.get("/", (req,res) => {
     res.send("Hi, i am root");
